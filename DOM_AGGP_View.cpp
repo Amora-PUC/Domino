@@ -144,7 +144,7 @@ int ShowRules(){
         " abertas na mesa, de forma que os pontos de um dos lados coincidam com os pontos da    ",
         " extremidade onde esta sendo colocada. As pecas dobradas sao colocadas de maneira      ",
         " transversal para facilitar sua localizacao. Quando o jogador coloca sua peca sobre a  ",
-        " mesa, seu turno se acaba e passa-se entao ao proximo jogador.  Se um jogador nao puder",
+        " mesa, seu turno se acaba e passa-se então ao proximo jogador.  Se um jogador nao puder",
         " jogar, devera comprar do monte disponivel tantas pecas                                ",
         " quanto forem necessarias.                                                             ",
 		"                                                                                      ",      

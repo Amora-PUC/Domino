@@ -12,12 +12,28 @@
 #include "DOM_AGGP_View.cpp"
 #include "DOM_AGGP_Model.h" 
 
+
+
+
+
 char turno;
 int op=1;
 int atual=14;
 int jog;
 int pecasnamesa=1;
 int a;
+
+void write_save(){
+	
+	
+	
+}
+void read_save(){
+	
+	
+	
+	
+}
 
 int verificarJogada(int ladoA, int ladoB) {
     if (ladoA == mesa[pecasnamesa-1].ladoE || ladoA == mesa[pecasnamesa-1].ladoD) {
@@ -39,6 +55,7 @@ int jogada(void){
 			pieces[atual].status=turno;
 			atual++;
 			return jog;
+			break;
 		case 2:
 			jogarPeca();
 			if(verificarJogada(ladoA, ladoB)==1){
@@ -50,11 +67,12 @@ int jogada(void){
 							pieces[i].status='M';
 						}
 				}
-			}		
+			}
+			break;	
 		case 3:
 			retornarMenu();
 			return -2;
-	
+			break;
 	}
 	return jog;	
 }

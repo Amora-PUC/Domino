@@ -12,6 +12,7 @@
 
 int ladoA,ladoB;
 
+
 void printWinMessage(int turno){
 	printf("PARABENS JOGADOR %d!!", turno);
 }
@@ -27,8 +28,132 @@ void mostrarMesa(int pecasnamesa){
 	}
 }
 
+void pausaTela(void){
+	system("pause");
+}
+
 void limparTela(void){
 	system("cls");
+}
+
+void espaco(int qntd){
+	
+	for(int i = 1; i <= qntd; i++){
+		printf("\n");
+	}
+}
+
+void errorMessage(int id){
+	
+	//Mostra a mensagens de erro correspondentes a variável de entrada ID
+	
+	switch(id){
+		
+		case 1:{
+			printf("\n <ERRO> A opcao selecionada nao eh valida \n\n ");
+			pausaTela();
+			limparTela();
+			break;
+		}
+		case 2:{
+			printf("\n <ERRO> A peca selecionada nao pode ser inserida \n\n ");
+			pausaTela();
+			limparTela();
+			break;
+		}
+		case 3:{
+			printf("\n <ERRO> Peca selecionada nao existe \n\n ");
+			pausaTela();
+			limparTela();
+			break;
+		}
+		
+		//Erros de abertura
+		
+		case 41:{
+			printf("O arquivo SAVE_GAME nao pode ser aberto para gravacao\n");
+			break;
+		}
+		case 42:{
+			printf("O arquivo SAVE_MESA nao pode ser aberto para gravacao\n");
+			break;
+		}
+		case 43:{
+			printf("O arquivo SAVE_ST nao pode ser aberto para gravacao\n");
+			break;
+		}
+		
+		//Erros de leitura
+		
+		case 51:{
+			printf("O arquivo SAVE_GAME nao pode ser aberto para leitura\n");
+			break;
+		}
+		case 52:{
+			printf("O arquivo SAVE_MESA nao pode ser aberto para leitura\n");
+			break;
+		}
+		case 53:{
+			printf("O arquivo SAVE_STATUS nao pode ser aberto para leitura\n");
+			break;
+		}
+		
+		//Erros de gravacao
+		
+		case 61:{
+			printf("Erro na gravacao de SAVE_GAME\n");
+			break;
+		}
+		case 62:{
+			printf("Erro na gravacao de SAVE_MESA\n");
+			break;
+		}
+		case 63:{
+			printf("Erro na gravacao de SAVE_STATUS\n");
+			break;
+		}
+	
+	    
+	    //Erros de leitura
+	    
+	    case 71:{
+	    	printf("Erro na leitura de SAVE_GAME\n");
+			break;
+		}
+		case 72:{
+	    	printf("Erro na leitura de SAVE_MESA\n");
+			break;
+		}
+		case 73:{
+	    	printf("Erro na leitura de SAVE_STATUS\n");
+			break;
+		}
+	
+   }
+
+}
+
+void sucessMessage(int id){
+	
+	switch(id){
+		
+		case 1:{
+
+			printf("\n < O jogo foi salvo com sucesso > \n\n");
+			pausaTela();
+			limparTela();
+			break;
+		}
+		case 2:{
+			
+			printf("\n < O jogo foi carregado com sucesso > \n\n");
+			pausaTela();
+			limparTela();
+			break;
+		}
+		
+		
+	}
 }
 
 void jogarPeca(void){
@@ -38,27 +163,24 @@ void jogarPeca(void){
  
     if(ladoA > 6 || ladoA < -1 || ladoB > 6 || ladoB < -1)
 	{
-       printf("A peca nao existe, tente outra!");
+	   errorMessage(3);
 	   return;
-
 	}
-
 
 }
 int jogadaOption(void){
 	printf("\n\nO que deseja fazer?\n");
-	printf("\n");
-	printf("1. Comprar peca");
-	printf("\n");
-	printf("2. Jogar uma peca");
-	printf("\n");
-	printf("3. Encerrar o jogo e retornar para o menu");
-	printf("\n");
+	printf("1. Comprar peca\n");
+	printf("2. Jogar uma peca\n");
+	printf("3. Salvar jogo\n");
+	printf("4. Carregar jogo\n");
+	printf("5. Encerrar o jogo e retornar para o menu \n\n> ");
 	fClear();
 	
 	int jogadaop;
 	scanf("%d", &jogadaop);
 	return jogadaop;
+	
 }
 
 void showPlayerPieces(char turno){
@@ -69,6 +191,8 @@ void showPlayerPieces(char turno){
 		}
 	}
 }
+
+
 
 void primeiraPeca(char turno){
 	printf("\n\nMESA: (Jogador %c)\n", turno);
@@ -84,11 +208,7 @@ int mostrarPecas(void){
 void encerrarPrograma()
 {
 	printf("\n\nEncerrando o programa!\n");
-}
-
-
-void errorMessage(void){
-	printf("ERROR");
+	
 }
 
 void retornarMenu()
@@ -96,9 +216,6 @@ void retornarMenu()
 	printf("\nRetornando para o menu!\n");
 }
  
-void espaco(void){
-	printf("\n");
-}
 
 int menuInicial(void){
 	int option;
@@ -109,17 +226,11 @@ int menuInicial(void){
 	printf("2. Iniciar jogo multiplayer (2 jogadores).\n");
 	printf("3. Mostrar embaralhamento atual.\n");
     printf("4. Sair do jogo\n");
-	printf("\n=========================================\n");
+	printf("\n=========================================\n\n> ");
 	scanf("%d", &option);
 
 	return option;
 }
-
-void opcaoinvalida()
-  {
-	printf("\nOpcao invalida, tente novamente!\n");
-  }
-
 
 int ShowRules(){
 	

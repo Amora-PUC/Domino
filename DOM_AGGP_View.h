@@ -9,3 +9,6 @@
 #include <iostream>
 
 int mostrarPecas();
+void espaco(int qntd);
+void errorMessage(int id);
+void fClear();

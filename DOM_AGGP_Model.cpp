@@ -31,7 +31,17 @@ void gerarPecas(void) {
     }
 }
 
+struct sitJogo{
+	int sPeca;
+	int jogadorAtual;
+	int jogadorComp;
+	int mesaDj;
+	int mesaEj;
+}; 
+struct sitJogo sJogo;
+
 //cria a estrutura Mesa
+
 struct Mesa {
     int ladoE;
     int ladoD;

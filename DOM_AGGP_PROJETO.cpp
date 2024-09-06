@@ -13,6 +13,7 @@ visualizar durante seu turno.
 
 #include "DOM_AGGP_Model.cpp"
 #include "DOM_AGGP_Controller.cpp"
+
 int main()
 {
 	gerarPecas();

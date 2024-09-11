@@ -1,10 +1,12 @@
-//DOM_Ativi01 - Projeto Domino - etapa 4
-//15/08/2024 - Grupo: AGGP
+//DOM_Ativi01 - Projeto Domino - etapa 5
+//28/08/2024 - Grupo: AGGP
 
 //Alexandre Maciano de Oliveira 
 //Gabriel Manganiello Terra
 //Gabriel Mechi Lima
 //Pedro Marinho Machado
+
+#define MAX_SAVES 11
 
 #include <ctime>
 #include <cstdlib>
@@ -12,9 +14,8 @@
 #include "DOM_AGGP_View.cpp"
 #include "DOM_AGGP_Model.h" 
 
-FILE *save_game;   //Arquivo estado das peças dos jogadores
-FILE *save_mesa;   //Arquivo estado das peças da mesa
-FILE *save_status;     //Arquivo estado da situação do jogo
+
+FILE *save_file;
 
 char turno;
 int op=1;
@@ -24,154 +25,100 @@ int pecasnamesa=1;
 int a;
 int type_game;
 
-
-void write_save(){
-	
-	sJogo.sPeca = a;
-    sJogo.jogadorAtual = atual;
-    sJogo.jogadorComp = type_game;
-	
-	//Abre arquivos de save para gravação/leitura estado do jogo
-	
-	
-	int cont_error1 = 0;
-	int cont_error2 = 0;
-	int i;
-	
-	//Abre FILE SAVE_GAME
-	
-	if((save_game = fopen("save_game","w") ) == NULL){
-        cont_error1++;
-	}
-	
-	//Abre FILE SAVE_MESA
-	
-	if((save_mesa = fopen("save_mesa","w")) == NULL){
-        cont_error1++;
-	}
-	
-	//Abre FILE SAVE_STATUS
-	
-	if((save_status = fopen("save_status","w")) == NULL){
-        cont_error1++;
-	}
-	
-	
-	//Grava em SAVE_GAME as peças dos jogadores
-	
-	for(i = 0; i < 28; i++){
-		
-		if(fwrite(&pieces[i], sizeof(struct Domino), 1, save_game) != 1){
-			cont_error2++;
+void versusIA(void){
+	pecasnamesa=1;
+	//embaralha
+	embaralharPecas();
+	//distribui pro p1
+	for(int i=0; i<7; i++)
+		pieces[i].status='1';
+	//distribui pro p2
+	for(int i=7; i<14; i++)
+		pieces[i].status='2';
+	//define a primeira peça (maior peça)
+	mesa[0].ladoE=-1;
+	mesa[0].ladoD=-1;
+	//procura uma peça [y|y]
+	for (int c=0;c<7;c++){
+		for (int i=0; i<14; i++){
+			if(pieces[i].numberA==c && pieces[i].numberB==c){
+				mesa[0].ladoE=pieces[i].numberA;
+				mesa[0].ladoD=pieces[i].numberB;
+				turno=pieces[i].status;
+			}
 		}
-		
-    }
-    
-    //Grava em SAVE_MESA as peças na mesa do jogo
-		
-	for(i = 0; i < 28; i++){
-		
-		if(fwrite(&mesa[i], sizeof(struct Domino), 1, save_mesa) != 1){
-			cont_error2++;
+	}
+	//se nao houver uma [y|y]...
+	if (mesa[0].ladoE==-1 && mesa[0].ladoD==-1){
+		for (int c=0;c<7;c++){
+			for (int i=0; i<14; i++){
+				if(pieces[i].numberA>=mesa[i].ladoE && pieces[i].numberB>=mesa[i].ladoD){
+					mesa[0].ladoE=pieces[i].numberA;
+					mesa[0].ladoD=pieces[i].numberB;
+				}
+			}
 		}
-		
-    }
-	
-	//Grava em SAVE_STATUS a situação do jogo	
-		
-	if(fwrite(&sJogo, sizeof(struct Domino), 1, save_status) != 1){
-			cont_error2++;
-	}	
-		
-
-	//Verifica se há erros
-	
-	
-
-	if(cont_error1 == 0 && cont_error2 == 0){
-		sucessMessage(1);
-	} else {
-		errorMessage(41);
-		errorMessage(51);
-		errorMessage(42);
-		errorMessage(52);
-		errorMessage(43);
-		errorMessage(53);
 	}
 	
-	fclose(save_game);
-	fclose(save_mesa);
-	fclose(save_status);
- 
+	//joga a primeira peça
+	for(int i=0;i<28;i++){
+		if(pieces[i].numberA==mesa[0].ladoE&&pieces[i].numberB==mesa[0].ladoD){
+			pieces[i].status='M';
+		}
+	}
+	
+	//partida contra Inteligencia Artificial
+	do{
+		do{		
+				if(turno=='2'){
+					turno='1';
+					rodadaIA();
+				}
+				else{
+					turno='1';
+					a=pecasnamesa;
+					mostrarMesa(pecasnamesa);
+					showPlayerPieces('1');
+					jog=jogada();
+					if (jog == -2){
+						return;
+					}
+					rodadaIA();
+			}while(jog==1);
+	} while(op==1);
+	
+	
+	
+} //fechamento funcao versusIA
 
-}
-
-void read_save(){
-	
-	sJogo.sPeca = pecasnamesa;
-    sJogo.jogadorAtual = atual;
-    sJogo.jogadorComp = type_game;
-	
-	int cont_error1 = 0;
-	int cont_error2 = 0;
-	
-	//Carrega estado das peças do jogo
-	
-	int i = 0;
-	if((save_game = fopen("save_game","r")) == NULL){
-       cont_error1++;
+void rodadaIA(void){
+	int control;
+	control=0;
+	while(control!=-1){
+		if(verificarJogada(pieces[control].numberA, pieces[control].numberB)!=0 && pieces[control].status=='2'){
+			pecasnamesa++;
+			mesa[pecasnamesa-1].ladoE=pieces[control].numberA;
+			mesa[pecasnamesa-1].ladoD=pieces[control].numberB;
+			control=-1;
+		}
+		else if (control>=28){
+			control=0;
+			pieces[atual].status='2';
+			atual++;  
+		}
 	}
-	
-	//Carrega estado das peças da mesa
-	
-	if((save_mesa = fopen("save_mesa","r")) == NULL){
-        cont_error1++;
-	}
-	
-	//Carrega estado das peças da situação
-	
-	if((save_status = fopen("save_status","r")) == NULL){
-        cont_error1++;
-	}
-	
-	  for(i = 0; i < 28; i++){
-	    if(fread(&pieces[i], sizeof(struct Domino), 1, save_game) != 1){
-			   cont_error2++;
-		    }
-      }
-	  
-	  for(i = 0; i < 28; i++){
-	    if(fread(&mesa[i], sizeof(struct Domino), 1, save_mesa) != 1){
-			   cont_error2++;
-		    }
-      }
-      
-        if(fread(&sJogo, sizeof(struct Domino), 1, save_status) != 1){
-			   cont_error2++;
-		    }
-
-	
-	if(cont_error1 == 0 && cont_error2 == 0){
-		sucessMessage(2);
-	} else {
-		errorMessage(71);
-		errorMessage(72);
-		errorMessage(73);
-	}
-	
-	fclose(save_game);
-	fclose(save_mesa);
-	fclose(save_status);
 }
 
 int verificarJogada(int ladoA, int ladoB) {
-    if (ladoA == mesa[pecasnamesa-1].ladoE || ladoA == mesa[pecasnamesa-1].ladoD) {
+	
+  
+    if (ladoA == mesa[pecasnamesa-1].ladoD && ladoA<=6 && ladoA>=0 && ladoB>=0 &&ladoB<=6) {
         return 1;  //jogada valida
     }
-    else if (ladoB == mesa[pecasnamesa-1].ladoE || ladoB == mesa[pecasnamesa-1].ladoD) {
+    else if (ladoB == mesa[pecasnamesa-1].ladoD && ladoA<=6 && ladoA>=0 && ladoB>=0 &&ladoB<=6) {
         return 1;  //jogada valida
     }
-    else if (ladoB == -1 || ladoB == -1) {
+    else if (ladoA == -1 || ladoB == -1) {
         return 2;  //Voltar
     }
     else{
@@ -188,12 +135,14 @@ int jogada(void){
 			pieces[atual].status=turno;
 			atual++;
 			limparTela();
-			return jog;
+			return 1;
 			break;
 	    }
 		case 2:{
 			jogarPeca();
+			
 			if(verificarJogada(ladoA, ladoB)==1){
+				InvertePeca(&ladoA, &ladoB);
 				pecasnamesa++;
 				mesa[pecasnamesa-1].ladoE=ladoA;
 				mesa[pecasnamesa-1].ladoD=ladoB;
@@ -201,6 +150,7 @@ int jogada(void){
 						if(pieces[i].numberA==ladoA&&pieces[i].numberB==ladoB){
 							pieces[i].status='M';
 						}
+						
 				limparTela();		
 				}
 			} else if (verificarJogada(ladoA, ladoB)== 2){
@@ -209,18 +159,20 @@ int jogada(void){
 				return jog;
 			} else {
 				errorMessage(2);
+				jog = 1;
+				return jog;
 			}
 			limparTela();
 			break;
 	    }
 		case 3:{
-			write_save();
+			mainSaveWrite();
 			jog = 1;
 			return jog;
 			break;
 	    }
 		case 4:{
-			read_save();
+			mainSaveRead();
 			jog = 1;
 			return jog;
 			break;
@@ -237,9 +189,8 @@ int jogada(void){
 	    return jog;
 	    break;
 	    }
-	
-	return jog;	
    }
+   	return jog;	
 }
 
 void embaralharPecas(void){
@@ -330,15 +281,31 @@ void prepararPartida(void){
 	} while(op==1);
 }
 void arcade(void){
-	prepararPartida();
+	versusIA();
 }
 void pvp(){
 	prepararPartida();
 }
 
+void InvertePeca(int *ladoA, int *ladoB){
+	
+	//Inverte peças de LADO A PARA LADO B e vice e versa
+	
+	int aux;
+	if (*ladoA != mesa[pecasnamesa-1].ladoD && *ladoB == mesa[pecasnamesa-1].ladoD){
+		   aux = *ladoA;
+		   *ladoA = *ladoB;
+		   *ladoB = aux;
+    } 
+    
+}
+
 void jogar(void){
+	
 	//Inicia o Jogo de Domino
 	//Chama o menu inicial do jogo e determine a opçao
+	
+	//InicialReadSave(); 
 	
 	int option;
 	
@@ -359,15 +326,211 @@ void jogar(void){
 			mostrarPecas();
 			break;	
 		case 4:
+			 mainSaveRead();
+			 arcade();
+			 break;
+		case 5:
 			encerrarPrograma();
 			exit(0);
-			break;
+			break;      
 		default:
 			errorMessage(1);
 			break;
 	} 
 	   fClear();
 
-     } while (option != 4);
-	//mostra as peças como geradas
+     } while (option != 5);
+	
+}
+
+void mainSaveRead(){
+
+	int op;
+	
+	//Reune toda operação de 'Carregar jogo', carregando dependendo de SAVE, o arquivo do jogo indicado pelo usuario
+	
+	do{
+	          check_memory_view();
+	          op = Saveop();
+	          
+	          if(check_memory(op) == true){
+  	                if(op != 0){
+  	                	
+  	                	
+  	                	  pecasnamesa = sJogo.sPeca;
+                          atual = sJogo.jogadorAtual ;
+                          type_game = sJogo.jogadorComp;
+    
+                         for (int i = 0; i < 28; i++) {
+                            pieces[i] = saves[op].pieces[i];
+                            mesa[i] = saves[op].mesa[i];
+                         }
+
+  	                	
+	                      readsave(op);
+	                      sucessMessage(2);
+	                      limparTela();
+	                } else {
+	                	  limparTela();
+	                	  errorMessage(71);
+					} 	
+			  } else {
+			  	    errorMessage(71);
+					espaco(2);
+					limparTela();   
+			  }
+	
+      } while (op == -1);
+      
+}
+
+void mainSaveWrite(){
+	
+	int op;
+	
+	do{
+	check_memory_view();
+	op = Saveop();
+      } while (op == -1);
+      
+      
+    sJogo.sPeca = pecasnamesa;
+    sJogo.jogadorAtual = atual;
+    sJogo.jogadorComp = type_game;
+    
+    	
+	for (int i = 0; i < 28; i++) {
+        saves[op].pieces[i] = pieces[i];
+        saves[op].mesa[i] = mesa[i];
+    }
+    saves[op].sJogo.jogadorAtual = atual;
+      
+      
+      
+	 if(check_memory(op) == true){	
+	 	if(Saveop2() == true){
+	 		saves[op].null = false;
+	 		time_data(op);
+	 		writesave(op);
+	 		sucessMessage(1);
+		 } 
+		 
+	 } else {
+	 	saves[op].null = false;
+	 	time_data(op);
+	 	writesave(op);
+	 	sucessMessage(1);
+	 }
+	 
+}
+
+int writesave(int save){
+	
+	FILE *save_file = NULL;
+
+    switch(save) {
+        case 1: save_file = fopen("save1.bin", "wb"); break;
+        case 2: save_file = fopen("save2.bin", "wb"); break;
+        case 3: save_file = fopen("save3.bin", "wb"); break;
+        case 4: save_file = fopen("save4.bin", "wb"); break;
+        case 5: save_file = fopen("save5.bin", "wb"); break;
+        case 6: save_file = fopen("save6.bin", "wb"); break;
+        case 7: save_file = fopen("save7.bin", "wb"); break;
+        case 8: save_file = fopen("save8.bin", "wb"); break;
+        case 9: save_file = fopen("save9.bin", "wb"); break;
+        case 10: save_file = fopen("save10.bin", "wb"); break;
+        default: 
+            printf("Numero de save invalido.\n");
+            return false;
+    }
+    
+
+    if (save_file == NULL) {
+        printf("Erro ao abrir o arquivo para gravacao.\n");
+        
+    }
+
+    if (fwrite(&saves[save], sizeof(struct save_data), 1, save_file) != 1) {
+        printf("Erro ao gravar os dados no arquivo.\n");
+        
+    }
+
+    fclose(save_file);
+	return 0;
+}
+
+int readsave(int save) {
+	
+	//le cada save separadamente de cada jogador dependo do retorno de SAVE
+	//Se save = 1, abre o save1.bin e le seu conteudo
+    
+
+    switch(save) {
+        case 1: save_file = fopen("save1.bin", "rb"); break;
+        case 2: save_file = fopen("save2.bin", "rb"); break;
+        case 3: save_file = fopen("save3.bin", "rb"); break;
+        case 4: save_file = fopen("save4.bin", "rb"); break;
+        case 5: save_file = fopen("save5.bin", "rb"); break;
+        case 6: save_file = fopen("save6.bin", "rb"); break;
+        case 7: save_file = fopen("save7.bin", "rb"); break;
+        case 8: save_file = fopen("save8.bin", "rb"); break;
+        case 9: save_file = fopen("save9.bin", "rb"); break;
+        case 10: save_file = fopen("save10.bin", "rb"); break;
+        default: 
+            printf(" numero de save invalido.\n ");
+            
+    }
+    
+         if (save_file == NULL) {
+          }
+             printf(" < Carregando saves > \n");
+
+          if (fread(&saves[save], sizeof(struct save_data), 1, save_file) != 1) {
+              printf(" < Carregando saves > \n");
+          }
+    
+    fclose(save_file);
+    return 0;
+}
+
+
+int check_memory_view(){
+	int i;
+	
+	//Mostra os dados de salvamento (SLOT VAZIO OU PREENCHIDO)
+	
+	   for(i = 1; i <= MAX_SAVES - 1; i++)
+		    if(saves[i].null == 1){	
+		  	    SaveSlots_view (1,i);
+		   } else{
+		   	    SaveSlots_view (2,i);
+		   }
+	return 0;
+}
+int check_memory(int save){
+	
+	//Verifica se o slot de save é nulo ou não
+	
+		 if(saves[save].null == false){
+		  	   return true;
+		  } 
+		   
+  return false;	      
+}
+
+int InicialReadSave(){
+	
+	pecasnamesa = sJogo.sPeca;
+    atual = sJogo.jogadorAtual ;
+    type_game = sJogo.jogadorComp;
+    
+    for(int j = 1; j <= 10; j++){
+     for (int i = 0; i < 28; i++) {
+        pieces[i] = saves[j].pieces[i];
+        mesa[i] = saves[j].mesa[i];
+    }
+      
+   }
+	readsave(1);
+	return 0;	
 }

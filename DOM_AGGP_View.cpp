@@ -1,11 +1,12 @@
-//DOM_Ativi01 - Projeto Dominó - etapa 3
-//15/08/2024 - Grupo: AGGP
+//DOM_Ativi01 - Projeto Domino - etapa 5
+//28/08/2024 - Grupo: AGGP
 
 //Alexandre Maciano de Oliveira 
 //Gabriel Manganiello Terra
 //Gabriel Mechi Lima
 //Pedro Marinho Machado
 
+#include <time.h>
 #include <iostream>
 #include "DOM_AGGP_View.h"
 #include "DOM_AGGP_Model.h"
@@ -117,7 +118,7 @@ void errorMessage(int id){
 	    //Erros de leitura
 	    
 	    case 71:{
-	    	printf("Erro na leitura de SAVE_GAME\n");
+	    	printf(" <Erro> O arquivo esta vazio, tente outro \n");
 			break;
 		}
 		case 72:{
@@ -156,8 +157,110 @@ void sucessMessage(int id){
 	}
 }
 
+
+void time_data(int num){
+	
+	//Usa a biblioteca <time.h> para determinar momento exato de um save e armazena no momento em que um save é gravado
+	
+	time_t now;
+	struct tm *info_time;
+	
+	time(&now);
+	
+	info_time = localtime(&now);
+	
+	saves[num].timedata.second = info_time->tm_sec;
+	saves[num].timedata.minute = info_time->tm_min;
+	saves[num].timedata.hour = info_time->tm_hour;
+	saves[num].timedata.day = info_time->tm_mday;
+	saves[num].timedata.month = info_time->tm_mon + 1;
+	saves[num].timedata.year = info_time->tm_year + 1900;  
+	
+}
+
+
+int SaveSlots_view (int id, int num){
+    
+    //Permite a visualização dos slots de salvamento
+    // 1 - SLOT VAZIO, 2 - SAVE PREENCHIDO
+	
+	int second = saves[num].timedata.second;
+	int minute = saves[num].timedata.minute;
+	int hour = saves[num].timedata.hour;
+	int day = saves[num].timedata.day;
+	int month = saves[num].timedata.month;
+	int year = saves[num].timedata.year;
+	
+	 switch(id){
+	 	
+	 	    case 1:{
+	 	    	  printf(" %d - [ SLOT VAZIO ]\n", num);
+			}
+			break;
+			case 2:{
+	 	    	  printf(" %d - [ SAVE PREENCHIDO %02d:%02d:%02d | %02d/%02d/%04d]\n", num, hour, minute, second, day, month, year);
+			break;
+			}
+			
+	  }
+    
+    return 0;
+	}
+	
+int Saveop() {
+	
+    // Coleta a opção de save pelo usuário
+    int op;
+
+    do {
+        printf("\n\nSelecione o save desejado (1 a 10) ou 0 para cancelar:\n> ");
+        scanf("%d", &op);
+        
+        if (op == 0) {
+            // O usuário decidiu cancelar
+            return 0;
+        } else if (op >= 1 && op <= 10) {
+            // Entrada válida
+            limparTela();
+            return op;
+        } else {
+            // Entrada inválida, mostra uma mensagem de erro e pede novamente
+            errorMessage(1);
+        }
+
+    } while (op < 1 || op > 10); // Continua pedindo enquanto o valor não for entre 1 e 10 ou 0
+
+    return op;
+}
+
+int Saveop2() {
+    int resposta;
+
+    // Pergunta ao usuário
+    espaco(1);
+    printf("Save ja existente, deseja sobrescrever esse save? (1 para Sim, 0 para Nao): ");
+    
+    // Lê a resposta do usuário
+    scanf("%d", &resposta);
+
+    
+    if (resposta == 1) {
+        return 1; // Deseja sobrescrever
+    } else if (resposta == 0) {
+        return 0; // Não deseja sobrescrever
+    } else {
+        printf("Entrada inválida! Por favor, insira 1 para Sim ou 0 para Nao.\n");
+        return Saveop2(); 
+    }
+}
+
+
+
 void jogarPeca(void){
-	printf("\nDigite a peca que deseja jogar (formato [a|b])([-1|-1] para sair):");
+	
+	//Exibe a seleção de peça para a jogada 
+	
+	printf("\nDigite a peca que deseja jogar ( OBS: formato [a|b] ) ([-1|-1] para sair): \n > ");
 	fClear();
 	scanf("[%d|%d]", &ladoA, &ladoB);
  
@@ -166,9 +269,10 @@ void jogarPeca(void){
 	   errorMessage(3);
 	   return;
 	}
-
 }
 int jogadaOption(void){
+	
+	//Exibe o menu durante o jogo
 	printf("\n\nO que deseja fazer?\n");
 	printf("1. Comprar peca\n");
 	printf("2. Jogar uma peca\n");
@@ -179,11 +283,15 @@ int jogadaOption(void){
 	
 	int jogadaop;
 	scanf("%d", &jogadaop);
+	espaco(1);
 	return jogadaop;
 	
 }
 
 void showPlayerPieces(char turno){
+	
+	//Exibe as peças respectivas aos jogadores
+	
 	printf("\n\nVEZ DO JOGADOR %c: (pecas disponiveis)\n", turno);
 	for (int i=0;i<28;i++){
 		if (pieces[i].status==turno){
@@ -195,11 +303,17 @@ void showPlayerPieces(char turno){
 
 
 void primeiraPeca(char turno){
+	
+	//Exibe a primeira peça na mesa
+	
 	printf("\n\nMESA: (Jogador %c)\n", turno);
 	printf("[%d|%d]", mesa[0].ladoE, mesa[0].ladoD);
 }
 
 int mostrarPecas(void){
+	
+	//Exibe as peças
+	
 	for (int i=0; i<28; i++)
 		printf("[%d|%d]", pieces[i].numberA, pieces[i].numberB);
 	return 0;
@@ -207,32 +321,41 @@ int mostrarPecas(void){
 
 void encerrarPrograma()
 {
+	//Exibe encerramento do programa
 	printf("\n\nEncerrando o programa!\n");
 	
 }
 
 void retornarMenu()
 {
+	//Exibe o retorno para o menu
 	printf("\nRetornando para o menu!\n");
 }
  
 
 int menuInicial(void){
+	
+	printf("\033[32m"); //Muda a cor da fonte para verde
 	int option;
+	
+	
 	printf("\nBEM VINDO(A) AO JOGO DE DOMINO!\n");
 	printf("=========================================\n");
 	printf("\nSelecione uma das seguintes opcoes:\n");
 	printf("\n1. Iniciar jogo modo Arcade.\n");
 	printf("2. Iniciar jogo multiplayer (2 jogadores).\n");
 	printf("3. Mostrar embaralhamento atual.\n");
-    printf("4. Sair do jogo\n");
+	printf("4. Carregar jogo salvo.\n");
+    printf("5. Sair do jogo\n");
 	printf("\n=========================================\n\n> ");
 	scanf("%d", &option);
-
 	return option;
 }
 
 int ShowRules(){
+	
+	
+	//Exibe as regras do jogo
 	
 	system("cls");
 	const char* rules[]
@@ -268,4 +391,5 @@ int ShowRules(){
 	
 	 system("pause");
 	 system("cls");
+	 return 0;
 }

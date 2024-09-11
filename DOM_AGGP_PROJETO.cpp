@@ -1,4 +1,4 @@
-//DOM_Ativi01 - Projeto Domino - etapa 4
+//DOM_Ativi01 - Projeto Domino - etapa 5
 //28/08/2024 - Grupo: AGGP
 
 //Alexandre Maciano de Oliveira 
@@ -6,9 +6,9 @@
 //Gabriel Mechi Lima
 //Pedro Marinho Machado
 
-/*Nessa estapa iremos permetir que o jogador visualize as regras do jogo e que possa finalizar o mesmo
-assim que desejar. Tambem sera possivel comprar pecas e sua mão estara escondida para que apenas ele possa
-visualizar durante seu turno.
+
+/*Nessa estapa o jogador será permitido salvar o jogo e retornar a este assim que desejar
+por multiplos diferentes "save slots".
 */
 
 #include "DOM_AGGP_Model.cpp"
